@@ -1,36 +1,30 @@
 import axios from "axios";
 
-axios.defaults.headers.common["live_s3wRHsU61cacfMUxuSyxBrZqdty1Yys6HG39g2nkSULSrRDvgau6zqCzTAucYOGM"] = "cheia ta";
-
+axios.defaults.headers.common["x-api-key"] = "live_s3wRHsU61cacfMUxuSyxBrZqdty1Yys6HG39g2nkSULSrRDvgau6zqCzTAucYOGM";
+const apiKey = 'live_s3wRHsU61cacfMUxuSyxBrZqdty1Yys6HG39g2nkSULSrRDvgau6zqCzTAucYOGM';
 const CatBreeds_URL = 'https://api.thecatapi.com/v1/breeds';
 
-const postCatbreed = document.querySelector(".breed-select");
-
-fetchCatBreed();
-
-const renderCatBreed = () => {
-    const BreedSelect = document.createElement('select');
-    BreedSelect.append();
-    return BreedSelect;
+const fetchBreeds = () => {
+  return axios
+    .get('https://api.thecatapi.com/v1/breeds')
+    .then(response => {
+      return response.data;
+    })
+    .catch(error => {
+      console.error('Error fetching data from API:', error);
+      throw error;
+    });
 };
-
-function fetchCatBreed() {
-const queryParams = new URLSearchParams ({
-    _limit: 1,
-    _id: "id",
-});
-
-axios 
-.get(`${CatBreeds_URL}/id?$${queryParams}`)
-.then((Response)=>{
-const postBreed = response.data.map((id) => renderCatBreed(id));
-})
-
-.catch((err) => console.log(err));
-}
-
-
-
-
-
-
+const fetchCatByBreed = breedId => {
+  return axios
+    .get(
+      `https://api.thecatapi.com/v1/images/search?api_key=${apiKey}&breed_ids=${breedId}`
+    )
+    .then(response => {
+      return response.data;
+    })
+    .catch(error => {
+      console.error('Error fetching data from API:', error);
+      throw error;
+    });
+};
