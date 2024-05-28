@@ -1,36 +1,47 @@
-import axios from "axios";
-
-axios.defaults.headers.common["x-api-key"] = "live_s3wRHsU61cacfMUxuSyxBrZqdty1Yys6HG39g2nkSULSrRDvgau6zqCzTAucYOGM";
-const apiKey = 'live_s3wRHsU61cacfMUxuSyxBrZqdty1Yys6HG39g2nkSULSrRDvgau6zqCzTAucYOGM';
-const CatBreeds_URL = 'https://api.thecatapi.com/v1/breeds';
-
-const fetchBreeds = () => {
-  return axios
-    .get('https://api.thecatapi.com/v1/breeds')
-    .then(response => {
-      return response.data;
-
-    })
-    .catch(error => {
-      console.error('Error fetching data from API:', error);
-      throw error;
+import { fetchBreeds, fetchCatByBreed } from '../src/cat-api.js';
+document.addEventListener('DOMContentLoaded', async () => {
+  const breedSelect = document.querySelector('.breed-select');
+  const loader = document.querySelector('.loader');
+  const error = document.querySelector('.error');
+  const catInfo = document.querySelector('.cat-info');
+  loader.style.display = 'none';
+  error.style.display = 'none';
+  try {
+    // Fetch breeds
+    const breeds = await fetchBreeds();
+    breeds.forEach(breed => {
+      const option = document.createElement('option');
+      option.value = breed.id;
+      option.textContent = breed.name;
+      breedSelect.appendChild(option);
     });
-
-};
-
-const fetchCatByBreed = breedId => {
-  return axios
-    .get(
-      `https://api.thecatapi.com/v1/images/search?api_key=${apiKey}&breed_ids=${breedId}`
-    )
-    .then(response => {
-      console.log(response.data);
-
-      return response.data;
-    })
-    .catch(error => {
-      console.error('Error fetching data from API:', error);
-      throw error;
+    breedSelect.addEventListener('change', async event => {
+      const selectedBreedId = event.target.value;
+      loader.style.display = 'block';
+      error.style.display = 'none';
+      catInfo.style.display = 'none';
+      try {
+        // Fetch cat by breed
+        const catData = await fetchCatByBreed(selectedBreedId);
+        const cat = catData[0];
+        catInfo.innerHTML = `
+          <img src="${cat.url}" alt="Cat Image">
+          <p><strong>Breed:</strong> ${cat.breeds[0].name}</p>
+          <p><strong>Description:</strong> ${cat.breeds[0].description}</p>
+          <p><strong>Temperament:</strong> ${cat.breeds[0].temperament}</p>
+        `;
+        loader.style.display = 'none';
+        catInfo.style.display = 'block';
+      } catch (err) {
+        // Handle error
+        error.style.display = 'block';
+        loader.style.display = 'none';
+        console.error(err);
+      }
     });
-
-};
+  } catch (err) {
+    // Handle error
+    error.style.display = 'block';
+    console.error(err);
+  }
+});
